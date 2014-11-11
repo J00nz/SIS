@@ -1,0 +1,14 @@
+body
+{
+    margin: 0;
+}
+
+#assets
+{
+    display: none;
+}
+
+.center
+{
+    text-align: center;
+}
