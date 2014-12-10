@@ -1,6 +1,7 @@
 body
 {
     margin: 0;
+    background: #333333;
 }
 
 #assets
@@ -11,4 +12,13 @@ body
 .center
 {
     text-align: center;
+}
+
+.button-container{
+}
+
+input[type="button"] {
+    background: black;
+    color: #55ff55;
+    border: #37B237 solid 2px;
 }

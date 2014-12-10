@@ -78,12 +78,13 @@ var sisGame = {
     tick: function () {
         var currentFrame = new Date();
         var delta = (currentFrame - this.lastFrame) * 0.1;
+	var defVelocity = (delta * this.shipHeight * 0.05);
 
 
         this.loopThroughArray(this.shots, function (shot, i) {
             var removed = false;
 
-            newY = shot.y - (delta * this.shipHeight * 0.5);
+            newY = shot.y - (defVelocity * 10);
 
             this.loopThroughArray(this.enemies, function (enemy, j) {
                 if (shot.x > enemy.x && (shot.x + 1) < (enemy.x + this.shipWidth) &&
@@ -115,7 +116,7 @@ var sisGame = {
         i = this.enemies.length;
         while (i--) {
             var enemy = this.enemies[i];
-            enemy.tick(delta, this, i);
+            enemy.tick(defVelocity, this, i);
         }
 
         this.render();
@@ -135,6 +136,8 @@ var sisGame = {
         this.canvas.height = this.height;
 
         this.width = (this.height / 2) >> 0;
+
+	this.fontSize = this.width / 25;
 
         this.canvas.width = this.width;
 
@@ -189,8 +192,8 @@ var sisGame = {
         ctx.fillRect(0, 0, this.width, this.height);
 
         ctx.fillStyle = "#55ff55";
-        ctx.font = '15px Courier New';
-        ctx.fillText('Funds: ' + this.money + "$", 10, 10);
+        ctx.font = this.fontSize + 'px Courier New';
+        ctx.fillText('Funds: ' + this.money + "$", 10, this.fontSize);
 
         this.renderShips(ctx);
         this.renderShots(ctx);
@@ -211,7 +214,7 @@ var sisGame = {
 
     renderEnemies: function (ctx) {
         this.loopThroughArray(this.enemies, function (enemy) {
-            ctx.drawImage(this.assets, 0, 0, 21, 15, enemy.x, enemy.y, this.shipWidth, this.shipHeight);
+            ctx.drawImage(this.assets, 0, 0, 22, 15, enemy.x, enemy.y, this.shipWidth, this.shipHeight);
         } .bind(this));
     },
 
