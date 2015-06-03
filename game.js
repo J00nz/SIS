@@ -1,4 +1,4 @@
-/*      a fairly simple game, copyrights: Johan "J00nz" Jönsson      */
+/*      a fairly simple game, copyrights: Johan "J00nz" JÃ¶nsson      */
 
 /* --------- Objects ---------- */
 
@@ -16,23 +16,23 @@ function Enemy(x, y) {
     this.x = x;
     this.y = y;
     this.vx = 0.5;
-
-    this.tick = function (v, game, i) {
-        this.y += v;
-
-        if (this.y > game.height) {
-            game.enemies.splice(i, 1);
-            game.money -= 100;
-            return;
-        }
-
-        this.x += (this.vx * v);
-
-        if ((this.vx > 0 && (this.x + game.shipWidth) > game.width) || (this.vx < 0 && this.x < 0)) {
-            this.vx = -this.vx;
-        }
-    };
 }
+
+Enemy.prototype.tick = function (v, game, i) {
+    this.y += v;
+
+    if (this.y > game.height) {
+        game.enemies.splice(i, 1);
+        game.money -= 100;
+        return;
+    }
+
+    this.x += (this.vx * v);
+
+    if ((this.vx > 0 && (this.x + game.shipWidth) > game.width) || (this.vx < 0 && this.x < 0)) {
+        this.vx = -this.vx;
+    }
+};
 
 /* --------- Game ---------- */
 
@@ -68,6 +68,8 @@ var sisGame = {
         var self = this;
 
         this.money = 750;
+        
+        this.render();
 
         setTimeout(this.tick.bind(this), 100);
 
@@ -78,7 +80,7 @@ var sisGame = {
     tick: function () {
         var currentFrame = new Date();
         var delta = (currentFrame - this.lastFrame) * 0.1;
-	var defVelocity = (delta * this.shipHeight * 0.05);
+        var defVelocity = (delta * this.shipHeight * 0.05);
 
 
         this.loopThroughArray(this.shots, function (shot, i) {
@@ -119,11 +121,9 @@ var sisGame = {
             enemy.tick(defVelocity, this, i);
         }
 
-        this.render();
-
         this.lastFrame = new Date();
 
-        requestAnimFrame(this.tick.bind(this));
+        setTimeout(this.tick.bind(this), 10);
     },
 
     doSpawnEnemy: function () {
@@ -198,6 +198,8 @@ var sisGame = {
         this.renderShips(ctx);
         this.renderShots(ctx);
         this.renderEnemies(ctx);
+        
+        requestAnimFrame(this.render.bind(this));
     },
 
     renderShips: function (ctx) {
