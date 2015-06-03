@@ -55,7 +55,7 @@ var sisGame = {
     // Application entry-point
     main: function () {
         this.canvas = document.getElementById("mainCanvas");
-        this.canvas.addEventListener("click", this.onCanvasClick.bind(this));
+        this.canvas.addEventListener("mousedown", this.onCanvasClick.bind(this));
 
         this.assets = document.getElementById("assets");
 
