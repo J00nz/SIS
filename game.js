@@ -12,10 +12,10 @@ function Shot(x, y) {
     this.y = y;
 }
 
-function Enemy(x, y) {
+function Enemy(x, y, d) {
     this.x = x;
     this.y = y;
-    this.vx = 0.5;
+    this.vx = 0.5 * d;
 }
 
 Enemy.prototype.tick = function (v, game, i) {
@@ -41,7 +41,7 @@ var sisGame = {
     ships: [],
     shots: [],
     enemies: [],
-    gameState: "Running",
+    gameState: 1,
     height: 0,
     width: 0,
     shipHeight: 0,
@@ -50,14 +50,12 @@ var sisGame = {
     enemySpawn: 5000,
     spawnEnemy: false,
     money: 0,
+    btnTxtPos: 0,
 
     // Application entry-point
     main: function () {
         this.canvas = document.getElementById("mainCanvas");
         this.canvas.addEventListener("click", this.onCanvasClick.bind(this));
-
-        document.getElementById("addShip").addEventListener("click", this.addShip.bind(this));
-        document.getElementById("shoot").addEventListener("click", this.shoot.bind(this));
 
         this.assets = document.getElementById("assets");
 
@@ -81,7 +79,8 @@ var sisGame = {
         var currentFrame = new Date();
         var delta = (currentFrame - this.lastFrame) * 0.1;
         var defVelocity = (delta * this.shipHeight * 0.05);
-
+        
+        this.gameState = (this.coolDown || this.money < 550) ? 0 : 1;
 
         this.loopThroughArray(this.shots, function (shot, i) {
             var removed = false;
@@ -109,7 +108,7 @@ var sisGame = {
 
         if (this.spawnEnemy) {
             this.spawnEnemy = false;
-            this.enemies.push(new Enemy(Math.random() * this.width, 0));
+            this.enemies.push(new Enemy(Math.random() * this.width, 0, Math.random() < 0.5 ? 1 : -1));
 
             this.enemySpawn > 0 && (this.enemySpawn -= 50);
             setTimeout(this.doSpawnEnemy.bind(this), this.enemySpawn);
@@ -131,45 +130,46 @@ var sisGame = {
     },
 
     updateCanvasVars: function () {
-        this.height = window.innerHeight - 35;
+        this.height = window.innerHeight;
 
         this.canvas.height = this.height;
 
         this.width = (this.height / 2) >> 0;
 
-	this.fontSize = this.width / 25;
+        this.fontSize = this.width / 25;
 
         this.canvas.width = this.width;
 
         this.shipWidth = (this.width / 10) >> 0; ;
         this.shipHeight = (this.shipWidth / 2) >> 0;
         this.shotWidth = (this.shipHeight / 4) >> 0;
+        
+        this.btnTxtPos = this.width - (this.fontSize * 11);
+    },
+    
+    coolDownTimer: function(){
+        --this.coolDown;
+        
+        if (this.coolDown > 0){
+            setTimeout(this.coolDownTimer.bind(this), 1000);
+        }
     },
 
     onCanvasClick: function (event) {
-        if (this.gameState == "AddingShip" && this.money > 500) {
+        if (this.gameState) {
             var ship = new Ship(event.offsetX - (this.shipWidth / 2), event.offsetY - (this.shipHeight / 2));
 
             this.ships.push(ship);
 
             this.money -= 500;
 
-            this.gameState = "Running";
-        }
-
-    },
-
-    addShip: function (event) {
-        var state = this.gameState;
-
-        if (state == "Running") {
-            if (!this.HasAddedShip) {
-                alert("Click on field to place ship!");
-                this.HasAddedShip = true;
-            }
-            this.gameState = "AddingShip";
+            this.gameState = 0;
+            
+            this.coolDown = 31;
+            
+            this.coolDownTimer();
         } else {
-            this.gameState = "Running";
+            this.shoot();
         }
     },
 
@@ -193,7 +193,18 @@ var sisGame = {
 
         ctx.fillStyle = "#55ff55";
         ctx.font = this.fontSize + 'px Courier New';
-        ctx.fillText('Funds: ' + this.money + "$", 10, this.fontSize);
+        var txt = 'Funds: ' + this.money + "$";
+        if (this.coolDown){
+            txt += ' - cool down: ' + this.coolDown;
+        }
+        ctx.fillText(txt, 10, this.fontSize);
+        
+        if (this.gameState === 1) {
+            var hlfFnt = this.fontSize / 2;
+            ctx.fillText('Click where you want your new ship!', 10, (this.height / 2) - hlfFnt);
+        } else {
+            ctx.fillText('Click to Shoot 5$', this.btnTxtPos, this.height);
+        }
 
         this.renderShips(ctx);
         this.renderShots(ctx);
